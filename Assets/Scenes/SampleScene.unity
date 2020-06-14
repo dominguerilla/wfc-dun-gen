@@ -459,6 +459,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Image Processor
       objectReference: {fileID: 0}
+    - target: {fileID: 5318184324764175102, guid: 835c9baa203f07349a6cf0f178c25194,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_IntArgument
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 5318184324764175103, guid: 835c9baa203f07349a6cf0f178c25194,
         type: 3}
       propertyPath: m_AnchorMin.y
