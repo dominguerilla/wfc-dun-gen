@@ -14,7 +14,6 @@ public class GridScanner : MonoBehaviour
     {
         GameObject[][][] grid = new GameObject[(int)dimensions.x][][];
         Vector3 scanStartLocation = firstTileLocation + (Vector3.forward * 5f);
-        int layerMask = 1 << 8;
 
         for (int x = 0; x < dimensions.x; x++)
         {
@@ -24,15 +23,26 @@ public class GridScanner : MonoBehaviour
                 grid[x][y] = new GameObject[(int)dimensions.z];
                 for (int z = 0; z < dimensions.z; z++)
                 {
-                    Vector3 scanLocation = new Vector3(scanStartLocation.x + (tileSize * x), scanStartLocation.y + (tileSize * y), scanStartLocation.z + (tileSize * z));
-                    RaycastHit hit;
-                    if (Physics.Raycast(scanLocation, -Vector3.forward, out hit, 5f, layerMask, QueryTriggerInteraction.Collide))
+                    Vector3 location = new Vector3(scanStartLocation.x + (tileSize * x), scanStartLocation.y + (tileSize * y), scanStartLocation.z + (tileSize * z));
+                    GameObject tile = ScanForTile(location);
+                    grid[x][y][z] = tile;
+                    if (tile)
                     {
-                        Debug.Log($"Found Tile {hit.transform.name} at {x},{y},{z}!");
-                        grid[x][y][z] = hit.transform.gameObject;
+                        Debug.Log($"Found Tile {tile.name} at {x},{y},{z}!");
                     }
                 }
             }
+        }
+        return null;
+    }
+
+    GameObject ScanForTile(Vector3 location)
+    {
+        int layerMask = 1 << 8;
+        RaycastHit hit;
+        if (Physics.Raycast(location, -Vector3.forward, out hit, 5f, layerMask, QueryTriggerInteraction.Collide))
+        {
+            return hit.transform.gameObject;
         }
         return null;
     }
