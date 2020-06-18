@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,11 +7,13 @@ public class GridScanner : MonoBehaviour
 {
     private void Start()
     {
-        int tileSize = 10;
-        CreateGrid(transform.position, new Vector3(4, 4, 4), tileSize);
+        int distanceBetweenModules = 10;
+        GameObject[][][] grid = CreateGrid(transform.position, new Vector3(4, 4, 4), distanceBetweenModules);
+        GameObject[][][] tile = GetTile(grid, 0, 0, 0, 2);
+        PrintGrid(tile, new Vector3(2, 2, 2));
     }
 
-    public GameObject[][][] CreateGrid(Vector3 firstTileLocation, Vector3 dimensions, int tileSize)
+    public GameObject[][][] CreateGrid(Vector3 firstTileLocation, Vector3 dimensions, int distanceBetweenModules)
     {
         GameObject[][][] grid = new GameObject[(int)dimensions.x][][];
         Vector3 scanStartLocation = firstTileLocation + (Vector3.forward * 5f);
@@ -23,20 +26,16 @@ public class GridScanner : MonoBehaviour
                 grid[x][y] = new GameObject[(int)dimensions.z];
                 for (int z = 0; z < dimensions.z; z++)
                 {
-                    Vector3 location = new Vector3(scanStartLocation.x + (tileSize * x), scanStartLocation.y + (tileSize * y), scanStartLocation.z + (tileSize * z));
-                    GameObject tile = ScanForTile(location);
-                    grid[x][y][z] = tile;
-                    if (tile)
-                    {
-                        Debug.Log($"Found Tile {tile.name} at {x},{y},{z}!");
-                    }
+                    Vector3 location = new Vector3(scanStartLocation.x + (distanceBetweenModules * x), scanStartLocation.y + (distanceBetweenModules * y), scanStartLocation.z + (distanceBetweenModules * z));
+                    GameObject module = ScanForModule(location);
+                    grid[x][y][z] = module;
                 }
             }
         }
-        return null;
+        return grid;
     }
 
-    GameObject ScanForTile(Vector3 location)
+    GameObject ScanForModule(Vector3 location)
     {
         int layerMask = 1 << 8;
         RaycastHit hit;
@@ -45,5 +44,63 @@ public class GridScanner : MonoBehaviour
             return hit.transform.gameObject;
         }
         return null;
+    }
+
+    GameObject[][][] GetTile(GameObject[][][] cubeGrid, int x, int y, int z, int tileSize)
+    {
+        int gridLength = cubeGrid[0].Length;
+        if (y + tileSize >= gridLength)
+        {
+            return null;
+        }
+
+        GameObject[][][] tile = new GameObject[tileSize][][];
+        
+        int tile_x = 0;
+        for (int grid_x = x; grid_x < x + tileSize; grid_x++)
+        {
+            tile[tile_x] = new GameObject[tileSize][];
+            int tile_y = 0;
+            for (int grid_y = y; grid_y < y + tileSize; grid_y++)
+            {
+                tile[tile_x][tile_y] = new GameObject[tileSize];
+                int tile_z = 0;
+                for (int grid_z = z; grid_z < z + tileSize; grid_z++)
+                {
+                    int desiredX = grid_x % gridLength;
+                    int desiredZ = grid_z % gridLength;
+                    int desiredY = grid_y; // don't wrap around the Y dimension
+                    tile[tile_x][tile_y][tile_z] = cubeGrid[desiredX][desiredY][desiredZ];
+                    tile_z++;
+                }
+                tile_y++;
+            }
+            tile_x++;
+        }
+
+        return tile;
+    }
+
+    void PrintGrid(GameObject[][][] grid, Vector3 dimensions)
+    {
+        if (grid == null)
+        {
+            Debug.Log("Grid is empty!");
+            return;
+        }
+        for (int x = 0; x < dimensions.x; x++)
+        {
+            for (int y = 0; y < dimensions.y; y++)
+            {
+                for (int z = 0; z < dimensions.z; z++)
+                {
+                    GameObject obj = grid[x][y][z];
+                    if (obj)
+                    {
+                        Debug.Log($"Cell [{x}][{y}][{z}]: {obj}");
+                    }
+                }
+            }
+        }
     }
 }
