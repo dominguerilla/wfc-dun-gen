@@ -5,12 +5,18 @@ using UnityEngine;
 
 public class GridScanner : MonoBehaviour
 {
+    [SerializeField]
+    Transform inputGridStartLocation;
+
+    [SerializeField]
+    Transform tileSpawnLocation;
+
     private void Start()
     {
         int distanceBetweenModules = 10;
-        GameObject[][][] grid = CreateGrid(transform.position, new Vector3(4, 4, 4), distanceBetweenModules);
-        GameObject[][][] tile = GetTile(grid, 0, 0, 0, 2);
-        PrintGrid(tile, new Vector3(2, 2, 2));
+        GameObject[][][] grid = CreateGrid(inputGridStartLocation.position, new Vector3(4, 4, 4), distanceBetweenModules);
+        GameObject[][][] tile = GetTile(grid, 1, 1, 1, 2);
+        SpawnTile(tileSpawnLocation.position, tile, distanceBetweenModules);
     }
 
     public GameObject[][][] CreateGrid(Vector3 firstTileLocation, Vector3 dimensions, int distanceBetweenModules)
@@ -79,6 +85,27 @@ public class GridScanner : MonoBehaviour
         }
 
         return tile;
+    }
+
+    void SpawnTile(Vector3 position, GameObject[][][] cubeTile, int distanceBetweenModules)
+    {
+        int sideLength = cubeTile[0].Length;
+        
+        for (int x = 0; x < sideLength; x++)
+        {
+            for (int y = 0; y < sideLength; y++)
+            {
+                for (int z = 0; z < sideLength; z++)
+                {
+                    GameObject module = cubeTile[x][y][z];
+                    if (module)
+                    {
+                        Vector3 spawnOffset = new Vector3(x * distanceBetweenModules, y * distanceBetweenModules, z * distanceBetweenModules);
+                        GameObject.Instantiate(module, position + spawnOffset, module.transform.rotation);
+                    }
+                }
+            }
+        }
     }
 
     void PrintGrid(GameObject[][][] grid, Vector3 dimensions)
