@@ -15,7 +15,7 @@ public class GridScanner : MonoBehaviour
     {
         int distanceBetweenModules = 10;
         GameObject[][][] grid = CreateGrid(inputGridStartLocation.position, new Vector3(4, 4, 4), distanceBetweenModules);
-        GameObject[][][] tile = GetTile(grid, 1, 1, 1, 2);
+        CubeTile tile = CreateTile(grid, 1, 1, 1, 2);
         SpawnTile(tileSpawnLocation.position, tile, distanceBetweenModules);
     }
 
@@ -52,7 +52,7 @@ public class GridScanner : MonoBehaviour
         return null;
     }
 
-    GameObject[][][] GetTile(GameObject[][][] cubeGrid, int x, int y, int z, int tileSize)
+    CubeTile CreateTile(GameObject[][][] cubeGrid, int x, int y, int z, int tileSize)
     {
         int gridLength = cubeGrid[0].Length;
         if (y + tileSize >= gridLength)
@@ -60,23 +60,23 @@ public class GridScanner : MonoBehaviour
             return null;
         }
 
-        GameObject[][][] tile = new GameObject[tileSize][][];
+        GameObject[][][] gridSample = new GameObject[tileSize][][];
         
         int tile_x = 0;
         for (int grid_x = x; grid_x < x + tileSize; grid_x++)
         {
-            tile[tile_x] = new GameObject[tileSize][];
+            gridSample[tile_x] = new GameObject[tileSize][];
             int tile_y = 0;
             for (int grid_y = y; grid_y < y + tileSize; grid_y++)
             {
-                tile[tile_x][tile_y] = new GameObject[tileSize];
+                gridSample[tile_x][tile_y] = new GameObject[tileSize];
                 int tile_z = 0;
                 for (int grid_z = z; grid_z < z + tileSize; grid_z++)
                 {
                     int desiredX = grid_x % gridLength;
                     int desiredZ = grid_z % gridLength;
                     int desiredY = grid_y; // don't wrap around the Y dimension
-                    tile[tile_x][tile_y][tile_z] = cubeGrid[desiredX][desiredY][desiredZ];
+                    gridSample[tile_x][tile_y][tile_z] = cubeGrid[desiredX][desiredY][desiredZ];
                     tile_z++;
                 }
                 tile_y++;
@@ -84,12 +84,12 @@ public class GridScanner : MonoBehaviour
             tile_x++;
         }
 
-        return tile;
+        return new CubeTile(gridSample);
     }
 
-    void SpawnTile(Vector3 position, GameObject[][][] cubeTile, int distanceBetweenModules)
+    void SpawnTile(Vector3 position, CubeTile cubeTile, int distanceBetweenModules)
     {
-        int sideLength = cubeTile[0].Length;
+        int sideLength = cubeTile.dimension;
         
         for (int x = 0; x < sideLength; x++)
         {
@@ -97,7 +97,7 @@ public class GridScanner : MonoBehaviour
             {
                 for (int z = 0; z < sideLength; z++)
                 {
-                    GameObject module = cubeTile[x][y][z];
+                    GameObject module = cubeTile.GetModule(x, y, z);
                     if (module)
                     {
                         Vector3 spawnOffset = new Vector3(x * distanceBetweenModules, y * distanceBetweenModules, z * distanceBetweenModules);
