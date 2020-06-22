@@ -97,11 +97,11 @@ public class GridScanner : MonoBehaviour
             {
                 for (int z = 0; z < sideLength; z++)
                 {
-                    GameObject module = cubeTile.GetModule(x, y, z);
+                    WFCModule module = cubeTile.GetModule(x, y, z);
                     if (module)
                     {
                         Vector3 spawnOffset = new Vector3(x * distanceBetweenModules, y * distanceBetweenModules, z * distanceBetweenModules);
-                        GameObject.Instantiate(module, position + spawnOffset, module.transform.rotation);
+                        GameObject.Instantiate(module.gameObject, position + spawnOffset, module.transform.rotation);
                     }
                 }
             }
