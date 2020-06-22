@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class WFCModule : MonoBehaviour
 {
+    public string id;
+
     // Start is called before the first frame update
     void Start()
     {

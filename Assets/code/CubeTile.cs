@@ -39,7 +39,7 @@ public class CubeTile
                 {
                     WFCModule module1 = this.GetModule(x, y, z);
                     WFCModule module2 = otherTile.GetModule(x, y, z);
-                    if (module1 != module2)
+                    if (module1.id != module2.id)
                     {
                         return false;
                     }

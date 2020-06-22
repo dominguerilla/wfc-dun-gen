@@ -15,11 +15,11 @@ public class GridScanner : MonoBehaviour
     {
         int distanceBetweenModules = 10;
         GameObject[][][] grid = CreateGrid(inputGridStartLocation.position, new Vector3(4, 4, 4), distanceBetweenModules);
-        CubeTile tile = CreateTile(grid, 1, 1, 1, 2);
-        SpawnTile(tileSpawnLocation.position, tile, distanceBetweenModules);
+        List<CubeTile> tiles = GetCubeTiles(grid, 2);
+        SpawnTiles(tiles, tileSpawnLocation.position, distanceBetweenModules);
     }
 
-    public GameObject[][][] CreateGrid(Vector3 firstTileLocation, Vector3 dimensions, int distanceBetweenModules)
+    GameObject[][][] CreateGrid(Vector3 firstTileLocation, Vector3 dimensions, int distanceBetweenModules)
     {
         GameObject[][][] grid = new GameObject[(int)dimensions.x][][];
         Vector3 scanStartLocation = firstTileLocation + (Vector3.forward * 5f);
@@ -39,6 +39,24 @@ public class GridScanner : MonoBehaviour
             }
         }
         return grid;
+    }
+
+    List<CubeTile> GetCubeTiles(GameObject[][][] grid, int tileSize)
+    {
+        List<CubeTile> tiles = new List<CubeTile>();
+        int dimension = grid.Length;
+        for (int x = 0; x < dimension; x++)
+        {
+            for (int y = 0; y < dimension; y++)
+            {
+                for (int z = 0; z < dimension; z++)
+                {
+                    CubeTile tile = CreateTile(grid, x, y, z, tileSize);
+                    if(tile != null) tiles.Add(tile);
+                }
+            }
+        }
+        return tiles;
     }
 
     GameObject ScanForModule(Vector3 location)
@@ -105,6 +123,15 @@ public class GridScanner : MonoBehaviour
                     }
                 }
             }
+        }
+    }
+
+    void SpawnTiles(List<CubeTile> tiles, Vector3 position, int distanceBetweenModules)
+    {
+        Vector3 offset = Vector3.zero;
+        foreach(CubeTile tile in tiles) {
+            SpawnTile(position + offset, tile, distanceBetweenModules);
+            offset += new Vector3(0, 0, (distanceBetweenModules * 2) + 1);
         }
     }
 
