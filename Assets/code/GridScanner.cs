@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 public class GridScanner : MonoBehaviour
 {
@@ -15,8 +16,9 @@ public class GridScanner : MonoBehaviour
     {
         int distanceBetweenModules = 10;
         GameObject[][][] grid = CreateGrid(inputGridStartLocation.position, new Vector3(4, 4, 4), distanceBetweenModules);
-        List<CubeTile> tiles = GetCubeTiles(grid, 2);
-        SpawnTiles(tiles, tileSpawnLocation.position, distanceBetweenModules);
+        Dictionary<CubeTile, int> tileFrequencies = GetTileFrequencies(grid, 2);
+        SpawnTiles(tileFrequencies, tileSpawnLocation.position, distanceBetweenModules);
+        PrintTileFrequencies(tileFrequencies);
     }
 
     GameObject[][][] CreateGrid(Vector3 firstTileLocation, Vector3 dimensions, int distanceBetweenModules)
@@ -41,22 +43,32 @@ public class GridScanner : MonoBehaviour
         return grid;
     }
 
-    List<CubeTile> GetCubeTiles(GameObject[][][] grid, int tileSize)
+    Dictionary<CubeTile, int>  GetTileFrequencies(GameObject[][][] grid, int tileSize)
     {
-        List<CubeTile> tiles = new List<CubeTile>();
+        Dictionary<CubeTile, int> tileFrequencies = new Dictionary<CubeTile, int>(new CubeTileComparer());
         int dimension = grid.Length;
+        int index = 0;
         for (int x = 0; x < dimension; x++)
         {
             for (int y = 0; y < dimension; y++)
             {
                 for (int z = 0; z < dimension; z++)
                 {
-                    CubeTile tile = CreateTile(grid, x, y, z, tileSize);
-                    if(tile != null) tiles.Add(tile);
+                    CubeTile tile = CreateTile(grid, new Vector3(x, y, z), tileSize, index);
+                    if (tile == null) continue;
+                    if (tileFrequencies.ContainsKey(tile))
+                    {
+                        tileFrequencies[tile] += 1;
+                    }
+                    else
+                    {
+                        tileFrequencies[tile] = 1;
+                    }
+                    index++;
                 }
             }
         }
-        return tiles;
+        return tileFrequencies;
     }
 
     GameObject ScanForModule(Vector3 location)
@@ -70,16 +82,20 @@ public class GridScanner : MonoBehaviour
         return null;
     }
 
-    CubeTile CreateTile(GameObject[][][] cubeGrid, int x, int y, int z, int tileSize)
+    CubeTile CreateTile(GameObject[][][] cubeGrid, Vector3 coordinates, int tileSize, int tileIndex)
     {
         int gridLength = cubeGrid[0].Length;
+        int x = (int)coordinates.x;
+        int y = (int)coordinates.y;
+        int z = (int)coordinates.z;
         if (y + tileSize >= gridLength)
         {
             return null;
         }
 
         GameObject[][][] gridSample = new GameObject[tileSize][][];
-        
+        string moduleNames = "";
+
         int tile_x = 0;
         for (int grid_x = x; grid_x < x + tileSize; grid_x++)
         {
@@ -95,6 +111,10 @@ public class GridScanner : MonoBehaviour
                     int desiredZ = grid_z % gridLength;
                     int desiredY = grid_y; // don't wrap around the Y dimension
                     gridSample[tile_x][tile_y][tile_z] = cubeGrid[desiredX][desiredY][desiredZ];
+
+                    string moduleName = gridSample[tile_x][tile_y][tile_z] != null ? gridSample[tile_x][tile_y][tile_z].GetComponent<WFCModule>().id : " ";
+                    moduleNames += " " + moduleName;
+
                     tile_z++;
                 }
                 tile_y++;
@@ -102,7 +122,8 @@ public class GridScanner : MonoBehaviour
             tile_x++;
         }
 
-        return new CubeTile(gridSample);
+        int hashCode = moduleNames.GetHashCode();
+        return new CubeTile(gridSample, tileIndex, hashCode);
     }
 
     void SpawnTile(Vector3 position, CubeTile cubeTile, int distanceBetweenModules)
@@ -116,7 +137,7 @@ public class GridScanner : MonoBehaviour
                 for (int z = 0; z < sideLength; z++)
                 {
                     WFCModule module = cubeTile.GetModule(x, y, z);
-                    if (module)
+                    if (module  != null)
                     {
                         Vector3 spawnOffset = new Vector3(x * distanceBetweenModules, y * distanceBetweenModules, z * distanceBetweenModules);
                         GameObject.Instantiate(module.gameObject, position + spawnOffset, module.transform.rotation);
@@ -126,35 +147,20 @@ public class GridScanner : MonoBehaviour
         }
     }
 
-    void SpawnTiles(List<CubeTile> tiles, Vector3 position, int distanceBetweenModules)
+    void SpawnTiles(Dictionary<CubeTile, int> tiles, Vector3 position, int distanceBetweenModules)
     {
         Vector3 offset = Vector3.zero;
-        foreach(CubeTile tile in tiles) {
+        foreach(CubeTile tile in tiles.Keys) {
             SpawnTile(position + offset, tile, distanceBetweenModules);
-            offset += new Vector3(0, 0, (distanceBetweenModules * 2) + 1);
+            offset += new Vector3(0, 0, (distanceBetweenModules * 2) + 10);
         }
     }
 
-    void PrintGrid(GameObject[][][] grid, Vector3 dimensions)
+    void PrintTileFrequencies(Dictionary<CubeTile, int> tileFrequencies)
     {
-        if (grid == null)
+        foreach (KeyValuePair<CubeTile, int> kv in tileFrequencies)
         {
-            Debug.Log("Grid is empty!");
-            return;
-        }
-        for (int x = 0; x < dimensions.x; x++)
-        {
-            for (int y = 0; y < dimensions.y; y++)
-            {
-                for (int z = 0; z < dimensions.z; z++)
-                {
-                    GameObject obj = grid[x][y][z];
-                    if (obj)
-                    {
-                        Debug.Log($"Cell [{x}][{y}][{z}]: {obj}");
-                    }
-                }
-            }
+            Debug.Log($"Tile {kv.Key.tileIndex} frequency: {kv.Value}");
         }
     }
 }

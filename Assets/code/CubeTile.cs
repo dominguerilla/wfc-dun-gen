@@ -6,11 +6,15 @@ public class CubeTile
 {
     GameObject[][][] grid;
     public int dimension { get; private set; }
+    public int tileIndex { get; private set; }
+    public int gridHashCode { get; private set; }
 
-    public CubeTile(GameObject[][][] grid)
+    public CubeTile(GameObject[][][] grid, int index, int hashCode)
     {
         this.grid = grid;
         this.dimension = grid[0].Length;
+        this.tileIndex = index;
+        this.gridHashCode = hashCode;
     }
 
     public WFCModule GetModule(int x, int y, int z)
@@ -26,27 +30,38 @@ public class CubeTile
         }
         return null;
     }
+}
 
-    public override bool Equals(object obj)
-    {        
-        CubeTile otherTile = (CubeTile)obj;
-        if (this.dimension != otherTile.dimension) return false;
-        for (int x = 0; x < this.dimension; x++)
+public class CubeTileComparer : IEqualityComparer<CubeTile>
+{
+    public bool Equals(CubeTile t1, CubeTile t2)
+    {
+
+        if (t1.dimension != t2.dimension) return false;
+        for (int x = 0; x < t1.dimension; x++)
         {
-            for (int y = 0; y < this.dimension; y++)
+            for (int y = 0; y < t1.dimension; y++)
             {
-                for (int z = 0; z < this.dimension; z++)
+                for (int z = 0; z < t2.dimension; z++)
                 {
-                    WFCModule module1 = this.GetModule(x, y, z);
-                    WFCModule module2 = otherTile.GetModule(x, y, z);
+                    WFCModule module1 = t1.GetModule(x, y, z);
+                    WFCModule module2 = t2.GetModule(x, y, z);
+                    if (module1 == null && module2 != null) return false;
+                    if (module1 != null && module2 == null) return false;
+                    if (module1 == null && module2 == null) return true;
                     if (module1.id != module2.id)
                     {
                         return false;
                     }
-                    
+
                 }
             }
         }
         return true;
+    }
+
+    public int GetHashCode(CubeTile obj)
+    {
+        return obj.gridHashCode;
     }
 }
