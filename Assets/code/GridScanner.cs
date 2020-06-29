@@ -129,7 +129,7 @@ public class GridScanner : MonoBehaviour
     void SpawnTile(Vector3 position, CubeTile cubeTile, int distanceBetweenModules)
     {
         int sideLength = cubeTile.dimension;
-        
+        GameObject tileObj = new GameObject(cubeTile.gridHashCode.ToString());
         for (int x = 0; x < sideLength; x++)
         {
             for (int y = 0; y < sideLength; y++)
@@ -140,7 +140,8 @@ public class GridScanner : MonoBehaviour
                     if (module  != null)
                     {
                         Vector3 spawnOffset = new Vector3(x * distanceBetweenModules, y * distanceBetweenModules, z * distanceBetweenModules);
-                        GameObject.Instantiate(module.gameObject, position + spawnOffset, module.transform.rotation);
+                        GameObject spawnedModule = GameObject.Instantiate(module.gameObject, position + spawnOffset, module.transform.rotation);
+                        spawnedModule.transform.SetParent(tileObj.transform, true);
                     }
                 }
             }
