@@ -42,10 +42,10 @@ public class GridScanner : MonoBehaviour
         }
     }
 
-    public void SpawnTiles(Dictionary<CubeTile, int> tiles, Vector3 position, int distanceBetweenModules)
+    public void SpawnTiles(List<CubeTile> tiles, Vector3 position, int distanceBetweenModules)
     {
         Vector3 offset = Vector3.zero;
-        foreach(CubeTile tile in tiles.Keys) {
+        foreach(CubeTile tile in tiles) {
             SpawnTile(position + offset, tile, distanceBetweenModules);
             offset += new Vector3(0, 0, (distanceBetweenModules * 2) + 10);
         }

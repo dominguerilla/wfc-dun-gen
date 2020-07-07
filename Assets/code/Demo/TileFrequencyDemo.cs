@@ -15,7 +15,7 @@ public class TileFrequencyDemo : MonoBehaviour
     {
         CubeGrid grid = scanner.ScanAndCreateGrid(new Vector3(gridDimensions, gridDimensions, gridDimensions), distanceBetweenModules);
         Dictionary<CubeTile, int> tileFrequencies = grid.GetTileFrequencies(tileSizeDimensions);
-        scanner.SpawnTiles(tileFrequencies, tileSpawnLocation.position, distanceBetweenModules);
+        scanner.SpawnTiles(new List<CubeTile>(tileFrequencies.Keys), tileSpawnLocation.position, distanceBetweenModules);
         scanner.PrintTileFrequencies(tileFrequencies);
     }
 }
