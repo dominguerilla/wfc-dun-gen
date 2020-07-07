@@ -13,8 +13,8 @@ public class TileFrequencyDemo : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        GameObject[][][] grid = scanner.ScanAndCreateGrid(new Vector3(gridDimensions, gridDimensions, gridDimensions), distanceBetweenModules);
-        Dictionary<CubeTile, int> tileFrequencies = scanner.GetTileFrequencies(grid, tileSizeDimensions);
+        CubeGrid grid = scanner.ScanAndCreateGrid(new Vector3(gridDimensions, gridDimensions, gridDimensions), distanceBetweenModules);
+        Dictionary<CubeTile, int> tileFrequencies = grid.GetTileFrequencies(tileSizeDimensions);
         scanner.SpawnTiles(tileFrequencies, tileSpawnLocation.position, distanceBetweenModules);
         scanner.PrintTileFrequencies(tileFrequencies);
     }
