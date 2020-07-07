@@ -24,6 +24,8 @@ public class GridScanner : MonoBehaviour
     {
         int sideLength = cubeTile.dimension;
         GameObject tileObj = new GameObject(cubeTile.gridHashCode.ToString());
+        CubeTileComponent tileComponent = tileObj.AddComponent<CubeTileComponent>();
+        tileComponent.SetCubeTile(cubeTile);
         for (int x = 0; x < sideLength; x++)
         {
             for (int y = 0; y < sideLength; y++)

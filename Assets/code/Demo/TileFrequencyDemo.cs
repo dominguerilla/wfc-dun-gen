@@ -16,6 +16,36 @@ public class TileFrequencyDemo : MonoBehaviour
         CubeGrid grid = scanner.ScanAndCreateGrid(new Vector3(gridDimensions, gridDimensions, gridDimensions), distanceBetweenModules);
         Dictionary<CubeTile, int> tileFrequencies = grid.GetTileFrequencies(tileSizeDimensions);
         scanner.SpawnTiles(new List<CubeTile>(tileFrequencies.Keys), tileSpawnLocation.position, distanceBetweenModules);
-        scanner.PrintTileFrequencies(tileFrequencies);
+        //scanner.PrintTileFrequencies(tileFrequencies);
+    }
+
+    private void Update()
+    {
+        GetMouseInput();
+    }
+
+    void GetMouseInput()
+    {
+        if (Input.GetMouseButtonDown(0))
+        {
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
+
+            if (Physics.Raycast(ray, out hit, 100))
+            {
+                WFCModule module = hit.transform.root.GetComponent<WFCModule>();
+                CubeTileComponent tileComponent = hit.transform.root.GetComponent<CubeTileComponent>();
+                if (module)
+                {
+                    Debug.Log("Module ID: " + module.id);
+                }
+
+                if (tileComponent)
+                {
+                    Debug.Log("CubeTile gridHashCode: " + tileComponent.cubeTile.gridHashCode);
+                }
+                
+            }
+        }
     }
 }
