@@ -9,16 +9,15 @@ public class GridScanner : MonoBehaviour
     [SerializeField]
     Transform inputGridStartLocation;
 
-    [SerializeField]
-    Transform tileSpawnLocation;
-
-    private void Start()
+    private void OnDrawGizmos()
     {
-        int distanceBetweenModules = 10;
-        GameObject[][][] grid = CreateGrid(inputGridStartLocation.position, new Vector3(4, 4, 4), distanceBetweenModules);
-        Dictionary<CubeTile, int> tileFrequencies = GetTileFrequencies(grid, 2);
-        SpawnTiles(tileFrequencies, tileSpawnLocation.position, distanceBetweenModules);
-        PrintTileFrequencies(tileFrequencies);
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(inputGridStartLocation.position, 0.5f);
+    }
+
+    public GameObject[][][] ScanAndCreateGrid(Vector3 dimensions, int distanceBetweenModules)
+    {
+        return CreateGrid(inputGridStartLocation.position, dimensions, distanceBetweenModules);
     }
 
     GameObject[][][] CreateGrid(Vector3 firstTileLocation, Vector3 dimensions, int distanceBetweenModules)
@@ -43,7 +42,7 @@ public class GridScanner : MonoBehaviour
         return grid;
     }
 
-    Dictionary<CubeTile, int>  GetTileFrequencies(GameObject[][][] grid, int tileSize)
+    public Dictionary<CubeTile, int>  GetTileFrequencies(GameObject[][][] grid, int tileSize)
     {
         Dictionary<CubeTile, int> tileFrequencies = new Dictionary<CubeTile, int>(new CubeTileComparer());
         int dimension = grid.Length;
@@ -123,7 +122,7 @@ public class GridScanner : MonoBehaviour
         }
 
         int hashCode = moduleNames.GetHashCode();
-        return new CubeTile(gridSample, tileIndex, hashCode);
+        return new CubeTile(gridSample, tileIndex, hashCode, coordinates);
     }
 
     void SpawnTile(Vector3 position, CubeTile cubeTile, int distanceBetweenModules)
@@ -148,7 +147,7 @@ public class GridScanner : MonoBehaviour
         }
     }
 
-    void SpawnTiles(Dictionary<CubeTile, int> tiles, Vector3 position, int distanceBetweenModules)
+    public void SpawnTiles(Dictionary<CubeTile, int> tiles, Vector3 position, int distanceBetweenModules)
     {
         Vector3 offset = Vector3.zero;
         foreach(CubeTile tile in tiles.Keys) {
@@ -157,7 +156,7 @@ public class GridScanner : MonoBehaviour
         }
     }
 
-    void PrintTileFrequencies(Dictionary<CubeTile, int> tileFrequencies)
+    public void PrintTileFrequencies(Dictionary<CubeTile, int> tileFrequencies)
     {
         foreach (KeyValuePair<CubeTile, int> kv in tileFrequencies)
         {

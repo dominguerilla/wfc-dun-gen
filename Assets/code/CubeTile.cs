@@ -8,13 +8,36 @@ public class CubeTile
     public int dimension { get; private set; }
     public int tileIndex { get; private set; }
     public int gridHashCode { get; private set; }
+    public Vector3 sampleCoordinates { get; private set; }
 
+    /// <summary>
+    /// Creates a CubeTile.
+    /// </summary>
+    /// <param name="grid">The grid this tile will be sampled from.</param>
+    /// <param name="index">The tile index identifying this CubeTile. Should be unique among all CubeTiles.</param>
+    /// <param name="hashCode">The hashed names of all the modules contained in this tile. Should be unique among all CubeTiles.</param>
     public CubeTile(GameObject[][][] grid, int index, int hashCode)
     {
         this.grid = grid;
         this.dimension = grid[0].Length;
         this.tileIndex = index;
         this.gridHashCode = hashCode;
+    }
+
+    /// <summary>
+    /// Creates a CubeTile.
+    /// </summary>
+    /// <param name="grid">The grid this tile will be sampled from.</param>
+    /// <param name="index">The tile index identifying this CubeTile. Should be unique among all CubeTiles.</param>
+    /// <param name="hashCode">The hashed names of all the modules contained in this tile. Should be unique among all CubeTiles.</param>
+    /// <param name="sampleCoordinates">The coordinates in grid that this CubeTile is sampled from.</param>
+    public CubeTile(GameObject[][][] grid, int index, int hashCode, Vector3 sampleCoordinates)
+    {
+        this.grid = grid;
+        this.dimension = grid[0].Length;
+        this.tileIndex = index;
+        this.gridHashCode = hashCode;
+        this.sampleCoordinates = sampleCoordinates;
     }
 
     public WFCModule GetModule(int x, int y, int z)
