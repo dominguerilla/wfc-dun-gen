@@ -10,11 +10,14 @@ public class TileFrequencyDemo : MonoBehaviour
     [SerializeField] int tileSizeDimensions = 2;
     [SerializeField] int distanceBetweenModules = 10;
 
+    CubeGrid grid;
+    Dictionary<CubeTile, int> tileFrequencies;
+
     // Start is called before the first frame update
     void Start()
     {
-        CubeGrid grid = scanner.ScanAndCreateGrid(new Vector3(gridDimensions, gridDimensions, gridDimensions), distanceBetweenModules);
-        Dictionary<CubeTile, int> tileFrequencies = grid.GetTileFrequencies(tileSizeDimensions);
+        this.grid = scanner.ScanAndCreateGrid(new Vector3(gridDimensions, gridDimensions, gridDimensions), distanceBetweenModules);
+        tileFrequencies = grid.GetTileFrequencies(tileSizeDimensions);
         scanner.SpawnTiles(new List<CubeTile>(tileFrequencies.Keys), tileSpawnLocation.position, distanceBetweenModules);
         //scanner.PrintTileFrequencies(tileFrequencies);
     }
@@ -22,6 +25,7 @@ public class TileFrequencyDemo : MonoBehaviour
     private void Update()
     {
         GetMouseInput();
+        RotateGrid();
     }
 
     void GetMouseInput()
@@ -31,7 +35,7 @@ public class TileFrequencyDemo : MonoBehaviour
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
 
-            if (Physics.Raycast(ray, out hit, 100))
+            if (Physics.Raycast(ray, out hit))
             {
                 WFCModule module = hit.transform.root.GetComponent<WFCModule>();
                 CubeTileComponent tileComponent = hit.transform.root.GetComponent<CubeTileComponent>();
@@ -42,10 +46,15 @@ public class TileFrequencyDemo : MonoBehaviour
 
                 if (tileComponent)
                 {
-                    Debug.Log("CubeTile gridHashCode: " + tileComponent.cubeTile.gridHashCode);
+                    Debug.Log($"CubeTile {tileComponent.cubeTile.tileIndex} sampled from {tileComponent.cubeTile.sampleCoordinates}, appears {tileFrequencies[tileComponent.cubeTile]} times");
                 }
                 
             }
         }
+    }
+
+    void RotateGrid()
+    {
+
     }
 }
