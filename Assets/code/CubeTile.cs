@@ -36,6 +36,15 @@ public class CubeTile
         this.sampleCoordinates = sampleCoordinates;
     }
 
+    public CubeTile(GameObject[][][] grid, int index, int hashCode)
+    {
+        this.grid = grid;
+        this.dimension = grid[0].Length;
+        this.tileIndex = index;
+        this.gridHashCode = hashCode;
+        this.sampleCoordinates = Vector3.zero;
+    }
+
     public WFCModule GetModule(int x, int y, int z)
     {
         GameObject obj = grid[x][y][z];
@@ -57,6 +66,9 @@ public class CubeTile
             throw new System.Exception("CubeTiles do not match in dimensions!");
         }
 
+        Vector3 thisStartIndices = Vector3.zero, otherStartIndices = Vector3.zero;
+        Vector3 thisEndIndices = Vector3.zero, otherEndIndices = Vector3.zero;
+
         //TODO: double-check these.
         switch (direction)
         {
@@ -65,35 +77,109 @@ public class CubeTile
                  compare all of this.grid[1...dimension][0...dimension][0...dimension]
                  with other.grid[0...dimension-1][0...dimension][0...dimension]
                  */
+                thisStartIndices = new Vector3(1, 0, 0);
+                thisEndIndices = new Vector3(dimension, dimension, dimension);
+                otherStartIndices = new Vector3(0, 0, 0);
+                otherEndIndices = new Vector3(dimension - 1, dimension, dimension);
+                break;
             case ADJACENT_DIRECTION.BACK:
                 /*
                  * compare all of this.grid[0...dimension-1][0...dimension][0...dimension]
                  * with other.grid[1...dimension][0...dimension][0...dimension]
                  */
+                thisStartIndices = new Vector3(0, 0, 0);
+                thisEndIndices = new Vector3(dimension-1, dimension, dimension);
+                otherStartIndices = new Vector3(1, 0, 0);
+                otherEndIndices = new Vector3(dimension, dimension, dimension);
+                break;
             case ADJACENT_DIRECTION.LEFT:
                 /*
                  * compare all of this.grid[0...dimension][0...dimension][0...dimension-1]
                  * with other.grid[0...dimension][0...dimension][1...dimension]
                  */
+                thisStartIndices = new Vector3(0, 0, 0);
+                thisEndIndices = new Vector3(dimension, dimension, dimension-1);
+                otherStartIndices = new Vector3(0, 0, 1);
+                otherEndIndices = new Vector3(dimension, dimension, dimension);
+                break;
             case ADJACENT_DIRECTION.RIGHT:
                 /*
                  * compare all of this.grid[0...dimension][0...dimension][1...dimension]
                  * with other.grid[0...dimension][0...dimension][0...dimension-1]
                  */
+                thisStartIndices = new Vector3(0, 0, 1);
+                thisEndIndices = new Vector3(dimension, dimension, dimension);
+                otherStartIndices = new Vector3(0, 0, 0);
+                otherEndIndices = new Vector3(dimension, dimension, dimension-1);
+                break;
             case ADJACENT_DIRECTION.UP:
                 /*
                  * compare all of this.grid[0...dimension][1...dimension][0...dimension]
                  * with other.grid[0...dimension][0...dimension-1][0...dimension]
                  */
+                thisStartIndices = new Vector3(0, 1, 0);
+                thisEndIndices = new Vector3(dimension, dimension, dimension);
+                otherStartIndices = new Vector3(0, 0, 0);
+                otherEndIndices = new Vector3(dimension, dimension-1, dimension);
+                break;
             case ADJACENT_DIRECTION.DOWN:
                 /*
                  * compare all of this.grid[0...dimension][0..dimension-1][0...dimension]
                  * with other.grid[0...dimension][1...dimension][0...dimension]
                  */
+                thisStartIndices = new Vector3(0, 0, 0);
+                thisEndIndices = new Vector3(dimension, dimension-1, dimension);
+                otherStartIndices = new Vector3(0, 1, 0);
+                otherEndIndices = new Vector3(dimension, dimension, dimension);
                 break;
             default:
                 throw new System.Exception("Invalid adjacent direction!");
         }
+
+        /*
+         * 
+                thisStartIndices = new Vector3(0, 0, 0);
+                thisEndIndices = new Vector3(dimension, dimension, dimension-1);
+                otherStartIndices = new Vector3(0, 0, 1);
+                otherEndIndices = new Vector3(dimension, dimension, dimension);
+
+        x = 0
+        y = 0
+        z = 0
+        otherX = 0
+        otherY = 0
+        otherZ = 1
+         */
+
+
+
+        int x = (int)thisStartIndices.x;
+        int otherX = (int)otherStartIndices.x;
+        for (; x < (int)thisEndIndices.x && otherX < (int)otherEndIndices.x; x++, otherX++)
+        {
+            int y = (int)thisStartIndices.y;
+            int otherY = (int)otherStartIndices.y;
+            for (; y < (int)thisEndIndices.y && otherY < (int)otherEndIndices.y; y++, otherY++)
+            {
+                int z = (int)thisStartIndices.z;
+                int otherZ = (int)otherStartIndices.z;
+                for (; z < (int)thisEndIndices.z && otherZ < (int)otherEndIndices.z; z++, otherZ++)
+                {
+                    WFCModule thisModule = GetModule(x, y, z);
+                    WFCModule otherModule = other.GetModule(otherX, otherY, otherZ);
+                    
+                    if (!thisModule && !otherModule) continue;
+                    if (thisModule && !otherModule) return false;
+                    if (!thisModule && otherModule) return false;
+                    if (thisModule.id != otherModule.id)
+                    {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return true;
     }
 }
 
